@@ -4,13 +4,29 @@ A full-stack, enterprise-grade machine learning web application powered directly
 
 ---
 
-## 1. Project Overview
+## 1. Live Public Website
 
-This application predicts airline passenger satisfaction (`Satisfied` vs. `Neutral or Dissatisfied`) based on flight demographics and flight service ratings. 
+- **Public Web Application**: **[https://words-populations-connecticut-diana.trycloudflare.com](https://words-populations-connecticut-diana.trycloudflare.com)**
+- **GitHub Repository**: **[https://github.com/siddharth194thakur-gif/airline-passenger-satisfaction](https://github.com/siddharth194thakur-gif/airline-passenger-satisfaction)**
+- **API Health Check**: `https://words-populations-connecticut-diana.trycloudflare.com/api/health`
+- **Swagger API Docs (Local)**: `http://127.0.0.1:8000/docs`
+
+---
+
+## 2. Project Overview
+
+This application predicts airline passenger satisfaction (`Satisfied` vs. `Neutral or Dissatisfied`) based on passenger demographics, flight operational parameters, and pre-flight/in-flight service ratings.
 
 Unlike conventional prototypes that simulate predictions or substitute new models, this system loads and executes the **authentic, pre-trained WEKA Random Forest model** in real time using WEKA's Java runtime serialization API (`SerializationHelper.read()`).
 
-### Verified Model Performance (Stratified 10-Fold Cross-Validation)
+### 100% Free & Zero-Cost Architecture
+- **Database**: Defaulted to local **SQLite** (`predictions.db`), requiring **₹0 / $0** paid database provisioning.
+- **Backend & Java Engine**: Runs in a containerized environment hosting both FastAPI and the Java WEKA Engine.
+- **Frontend**: Fully responsive React 18 + Vite SPA styled with Tailwind CSS.
+
+---
+
+## 3. Verified Model Performance (Stratified 10-Fold Cross-Validation)
 
 The model was trained on **129,880 airline passenger instances** using WEKA RandomForest (100 iterations, base learner RandomTree, Seed 1):
 
@@ -31,7 +47,7 @@ The model was trained on **129,880 airline passenger instances** using WEKA Rand
 | **Weighted PRC Area** | 0.995 |
 | **Model Build Time** | 23.16 seconds |
 
-#### Verified Confusion Matrix:
+### Verified Confusion Matrix:
 
 | Actual / Predicted | Neutral or Dissatisfied | Satisfied | Total |
 |---|---:|---:|---:|
@@ -42,108 +58,97 @@ The model was trained on **129,880 airline passenger instances** using WEKA Rand
 
 ---
 
-## 2. Production Deployment Architecture
+## 4. End-to-End Architecture
 
 ```
-User Browser
-     │
-     ▼
-Vercel (React 18 + Vite TypeScript SPA)
-     │
-     ▼  HTTPS (VITE_API_BASE_URL)
-Render Docker Web Service ($PORT)
-  ┌────────────────────────────────────────────────────────┐
-  │  FastAPI (Python 3.12, Uvicorn)                        │
-  │     │                                                  │
-  │     ▼  Internal HTTP (127.0.0.1:8081)                  │
-  │  Java WEKA Engine (OpenJDK 21, weka.jar)               │
-  │     │                                                  │
-  │     ▼  In-Memory Serialization                         │
-  │  WEKA RandomForest Model (projectmodel_weka.model)     │
-  └────────────────────────────────────────────────────────┘
-     │
-     ▼  SQLAlchemy (DATABASE_URL)
-Render Managed PostgreSQL Database
+User (Mobile / Tablet / Desktop)
+                 │
+                 ▼
+React 18 + TypeScript + Tailwind CSS Frontend
+                 │
+                 ▼  (HTTP REST)
+FastAPI Python Backend (Port 8000)
+                 │
+                 ▼  (Internal HTTP 127.0.0.1:8081)
+Java WEKA Prediction Engine (OpenJDK, weka.jar)
+                 │
+                 ▼  (In-Memory Java Instance)
+Original Serialized RandomForest Model (projectmodel_weka.model)
+                 │
+                 ▼  (classifyInstance & distributionForInstance)
+Real-time Satisfaction Prediction & Probabilities
+                 │
+                 ▼
+SQLite Database (Persistent Prediction History — ₹0 Cost)
 ```
 
 ---
 
-## 3. Render Deployment (Backend + Java Engine)
+## 5. Responsive UI Features
 
-Render runs both the Java WEKA prediction engine and the FastAPI backend within a single managed Docker Web Service container.
+The interface is engineered to adapt smoothly to all screen sizes (phones from 320px width, tablets, laptops, and ultra-wide desktops):
 
-### Step 1: Create a PostgreSQL Database on Render
-1. Go to your [Render Dashboard](https://dashboard.render.com).
-2. Click **New +** $\rightarrow$ **PostgreSQL**.
-3. Name it (e.g., `airline-satisfaction-db`).
-4. Select the Free or Starter plan.
-5. Click **Create Database**.
-6. Once provisioned, copy the **Internal Database URL** (e.g., `postgres://user:password@host/dbname`).
-
-### Step 2: Create the Docker Web Service on Render
-1. Push your repository to GitHub (see [Git Instructions](#5-git-commands-to-push-to-github)).
-2. In the Render Dashboard, click **New +** $\rightarrow$ **Web Service**.
-3. Connect your GitHub repository.
-4. Set the following settings:
-   - **Name**: `airline-satisfaction-backend`
-   - **Language**: `Docker`
-   - **Branch**: `main`
-   - **Root Directory**: `.` (leave as root)
-   - **Dockerfile Path**: `./Dockerfile` (or `./backend/Dockerfile`)
-   - **Instance Type**: `Free` or `Starter` (Starter 1GB recommended for production)
-5. Under **Environment Variables**, add:
-   - `DATABASE_URL`: Paste the Internal Database URL from Step 1.
-   - `CORS_ORIGINS`: `["https://your-frontend.vercel.app", "http://localhost:5173"]` (or `*`)
-   - `JAVA_OPTS`: `-Xms128m -Xmx600m`
-6. Click **Create Web Service**.
-7. Render will build the Docker container, launch the Java prediction engine, wait for the model to load into memory, and expose FastAPI.
-8. Once deployed, note your service URL (e.g., `https://airline-satisfaction-backend.onrender.com`).
+- **Adaptive Layout**: Desktop sidebar navigation with persistent engine status pill; mobile slide-out navigation drawer with backdrop click-to-close.
+- **Touch-Friendly Rating Selectors**: Rating grids (0–5) formatted into auto-scaling 6-column grids with active feedback on all mobile widths.
+- **Scrollable Data Tables**: Prediction history and confusion matrix tables include touch-scrolling wrappers (`-webkit-overflow-scrolling: touch`) and formatted badges.
+- **Responsive Dashboard Cards**: Stacks dynamically from 1 column on mobile to 2 on tablets and 4 on desktop screens.
+- **Dark Mode Support**: One-click toggle between crisp enterprise light mode and dark mode with persistent user preference.
 
 ---
 
-## 4. Vercel Deployment (Frontend React SPA)
+## 6. Directory Structure
 
-1. Go to your [Vercel Dashboard](https://vercel.com/dashboard).
-2. Click **Add New...** $\rightarrow$ **Project**.
-3. Import your GitHub repository.
-4. Configure the project settings:
-   - **Framework Preset**: `Vite`
-   - **Root Directory**: Click *Edit* and select **`frontend`**
-   - **Build Command**: `npm run build`
-   - **Output Directory**: `dist`
-5. Under **Environment Variables**, add:
-   - **Name**: `VITE_API_BASE_URL`
-   - **Value**: `https://airline-satisfaction-backend.onrender.com/api` (replace with your Render backend URL)
-6. Click **Deploy**.
-7. Once deployed, Vercel gives you your production URL (e.g., `https://airline-satisfaction.vercel.app`).
-8. Back in Render, add your Vercel URL to `CORS_ORIGINS` if you restricted CORS.
-
----
-
-## 5. Git Commands to Push to GitHub
-
-```bash
-cd /Users/siddharthsingh/wekaproject
-
-# 1. Create a new repository on github.com (e.g. airline-satisfaction-app)
-
-# 2. Add your remote
-git remote add origin https://github.com/<YOUR_USERNAME>/airline-satisfaction-app.git
-
-# 3. Ensure branch is main
-git branch -M main
-
-# 4. Push code and model to GitHub
-git push -u origin main
+```
+wekaproject/
+│
+├── frontend/
+│   ├── src/
+│   │   ├── components/       # Rating components & cards
+│   │   ├── pages/            # Dashboard, Predict, History, Performance, About
+│   │   ├── layouts/          # Responsive AppLayout with mobile navigation drawer
+│   │   ├── services/         # API client communicating with backend
+│   │   ├── types/            # TypeScript schemas & interfaces
+│   │   ├── App.tsx           # Router configuration
+│   │   └── main.tsx          # React entrypoint
+│   ├── package.json
+│   ├── vite.config.ts
+│   ├── tailwind.config.js
+│   ├── vercel.json           # SPA rewrites for direct navigation & refresh
+│   └── start-frontend.sh     # Frontend launcher script
+│
+├── backend/
+│   ├── app/
+│   │   ├── main.py           # FastAPI entrypoint & CORS
+│   │   ├── config/           # App settings & SQLite / PostgreSQL fallback
+│   │   ├── database/         # SQLAlchemy SQLite session & models
+│   │   ├── routes/           # health, model, predict, history, dashboard
+│   │   ├── schemas/          # Pydantic input/output schemas
+│   │   └── services/         # weka_client & prediction_service
+│   │
+│   ├── java-engine/
+│   │   ├── src/com/weka/prediction/WekaPredictionServer.java # Java Engine HTTP Server
+│   │   ├── lib/weka.jar      # WEKA 3.8.7 JAR
+│   │   └── start-engine.sh   # Java server launcher script
+│   │
+│   ├── model/
+│   │   └── projectmodel_weka.model # Pre-trained 70.4 MB WEKA RandomForest binary
+│   │
+│   ├── tests/
+│   │   └── test_api.py       # Automated integration test suite (7/7 passing)
+│   ├── requirements.txt
+│   ├── entrypoint.sh         # Production container supervisor script
+│   └── Dockerfile            # Container definition for cloud deployments
+│
+├── .gitignore
+├── Dockerfile                # Root container definition for Render
+└── README.md
 ```
 
-> **Note on Model Size**: The model file `backend/model/projectmodel_weka.model` is **70.4 MB**. GitHub permits files up to 100 MB directly via standard `git push`.
-
 ---
 
-## 6. Local Development (macOS)
+## 7. Local Run Commands (macOS)
 
-Open 3 separate Terminal tabs in `/Users/siddharthsingh/wekaproject`:
+To run the full stack locally:
 
 ### Terminal 1: Java WEKA Prediction Engine (Port 8081)
 ```bash
@@ -157,7 +162,7 @@ cd /Users/siddharthsingh/wekaproject/backend
 ./start-backend.sh
 ```
 
-### Terminal 3: Vite React Frontend (Port 5173)
+### Terminal 3: React Frontend (Port 5173)
 ```bash
 cd /Users/siddharthsingh/wekaproject/frontend
 ./start-frontend.sh
@@ -167,9 +172,9 @@ Open browser at **[http://localhost:5173](http://localhost:5173)**.
 
 ---
 
-## 7. Automated Testing
+## 8. Automated Testing
 
-To run the integration tests locally:
+To run the integration tests:
 
 ```bash
 cd /Users/siddharthsingh/wekaproject/backend
@@ -182,16 +187,22 @@ All 7 integration tests verify:
 - Model info and 10-fold CV metrics
 - Real-time classification for Satisfied and Dissatisfied profiles
 - Pydantic range validation rejection (422)
-- SQLite/PostgreSQL history logging and retrieval
+- SQLite history logging and retrieval
 - Real-time dashboard statistics calculation
 
 ---
 
-## 8. Troubleshooting
+## 9. Cloud Deployment (Render + Vercel)
 
-| Issue | Cause | Solution |
-|---|---|---|
-| **Render: Out Of Memory (OOM)** | Java default memory exceeded container RAM. | Set environment variable `JAVA_OPTS=-Xms128m -Xmx512m` in Render dashboard. |
-| **Vercel: 404 on refresh** | Direct navigation without SPA rewrites. | Verified `frontend/vercel.json` rewrite `{ "source": "/(.*)", "destination": "/index.html" }` is included. |
-| **Frontend: CORS Network Error** | Backend did not allow frontend origin. | Ensure `CORS_ORIGINS` in Render includes your Vercel URL or `*`. |
-| **Backend: Database connection error** | Render provides `postgres://` which SQLAlchemy 2.0 rejects. | `settings.py` automatically converts `postgres://` to `postgresql://`. Ensure `psycopg2-binary` is installed. |
+### Backend on Render (Free Tier):
+1. Go to [dashboard.render.com](https://dashboard.render.com) and click **New +** $\rightarrow$ **Web Service**.
+2. Select repository: `siddharth194thakur-gif/airline-passenger-satisfaction`.
+3. Choose **Docker** environment and **Free** plan.
+4. Render builds the container using `Dockerfile` and gives your backend URL.
+
+### Frontend on Vercel (Free Tier):
+1. Go to [vercel.com](https://vercel.com) and click **Add New...** $\rightarrow$ **Project**.
+2. Import `siddharth194thakur-gif/airline-passenger-satisfaction`.
+3. Set **Root Directory** to `frontend`.
+4. Add environment variable `VITE_API_BASE_URL` with your Render backend URL.
+5. Click **Deploy**.
