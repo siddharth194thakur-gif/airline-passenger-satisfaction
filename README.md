@@ -4,12 +4,14 @@ A full-stack, enterprise-grade machine learning web application powered directly
 
 ---
 
-## 1. Live Public Website
+## 1. Live Production Deployment & URLs
 
-- **Public Web Application**: **[https://words-populations-connecticut-diana.trycloudflare.com](https://words-populations-connecticut-diana.trycloudflare.com)**
+- **Live Production Frontend (Vercel)**: **[https://frontend-omega-livid-48.vercel.app](https://frontend-omega-livid-48.vercel.app)**
+- **Live Production Backend (Render)**: **[https://airline-satisfaction-backend.onrender.com](https://airline-satisfaction-backend.onrender.com)**
+- **Interactive Swagger API Docs**: **[https://airline-satisfaction-backend.onrender.com/docs](https://airline-satisfaction-backend.onrender.com/docs)**
+- **Backend Health Check**: `https://airline-satisfaction-backend.onrender.com/api/health`
+- **Model Info Endpoint**: `https://airline-satisfaction-backend.onrender.com/api/model/info`
 - **GitHub Repository**: **[https://github.com/siddharth194thakur-gif/airline-passenger-satisfaction](https://github.com/siddharth194thakur-gif/airline-passenger-satisfaction)**
-- **API Health Check**: `https://words-populations-connecticut-diana.trycloudflare.com/api/health`
-- **Swagger API Docs (Local)**: `http://127.0.0.1:8000/docs`
 
 ---
 
