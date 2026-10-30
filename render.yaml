@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: airline-satisfaction-backend
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: oregon
+    healthCheckPath: /api/health
+    envVars:
+      - key: CORS_ORIGINS
+        value: "*"
+      - key: JAVA_OPTS
+        value: "-Xms128m -Xmx600m"
+      - key: WEKA_ENGINE_URL
+        value: "http://127.0.0.1:8081"
