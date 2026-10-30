@@ -42,136 +42,134 @@ The model was trained on **129,880 airline passenger instances** using WEKA Rand
 
 ---
 
-## 2. Architecture & Technology Stack
+## 2. Production Deployment Architecture
 
 ```
-React + TypeScript Frontend (Port 5173)
-                 ↓ (HTTP REST)
-FastAPI Python Backend (Port 8000)
-                 ↓ (HTTP JSON)
-Java WEKA Prediction Engine (Port 8081)
-                 ↓ (In-Memory Java Instance)
-Original Serialized WEKA RandomForest Model (projectmodel_weka.model)
-                 ↓ (classifyInstance & distributionForInstance)
-Real-time Satisfaction Prediction & Probabilities
-                 ↓
-SQLite Database (Persistent Prediction History)
-```
-
-- **Frontend**: React 18, Vite, TypeScript, Tailwind CSS, Lucide React, Recharts, React Router v6.
-- **Backend**: Python 3.14, FastAPI, Pydantic v2, SQLAlchemy, SQLite, Uvicorn, HTTPX.
-- **WEKA Integration**: OpenJDK 25 LTS, WEKA 3.8.7 JAR (`SerializationHelper`, `RandomForest`, `DenseInstance`).
-
----
-
-## 3. Project Directory Structure
-
-```
-wekaproject/
-│
-├── frontend/
-│   ├── src/
-│   │   ├── components/       # UI components & rating selectors
-│   │   ├── pages/            # Dashboard, Predict, History, Performance, About
-│   │   ├── layouts/          # AppLayout with sidebar & live engine health pill
-│   │   ├── services/         # API client communicating with FastAPI
-│   │   ├── types/            # TypeScript schemas & interfaces
-│   │   ├── App.tsx           # Router configuration
-│   │   └── main.tsx          # React entrypoint
-│   ├── package.json
-│   ├── vite.config.ts
-│   ├── tailwind.config.js
-│   └── start-frontend.sh     # Frontend launcher script
-│
-├── backend/
-│   ├── app/
-│   │   ├── main.py           # FastAPI entrypoint & CORS
-│   │   ├── config/           # App settings & environment loader
-│   │   ├── database/         # SQLAlchemy SQLite session & models
-│   │   ├── routes/           # health, model, predict, history, dashboard
-│   │   ├── schemas/          # Pydantic input/output schemas
-│   │   └── services/         # weka_client & prediction_service
-│   │
-│   ├── java-engine/
-│   │   ├── src/com/weka/prediction/WekaPredictionServer.java # Java Engine HTTP Server
-│   │   ├── lib/weka.jar      # WEKA 3.8.7 JAR
-│   │   └── start-engine.sh   # Java server launcher script
-│   │
-│   ├── model/
-│   │   └── projectmodel_weka.model # Pre-trained 67 MB WEKA RandomForest binary
-│   │
-│   ├── tests/
-│   │   └── test_api.py       # Automated integration test suite
-│   ├── requirements.txt
-│   ├── start-backend.sh      # Backend launcher script
-│   └── .env.example
-│
-├── .gitignore
-└── README.md
+User Browser
+     │
+     ▼
+Vercel (React 18 + Vite TypeScript SPA)
+     │
+     ▼  HTTPS (VITE_API_BASE_URL)
+Render Docker Web Service ($PORT)
+  ┌────────────────────────────────────────────────────────┐
+  │  FastAPI (Python 3.12, Uvicorn)                        │
+  │     │                                                  │
+  │     ▼  Internal HTTP (127.0.0.1:8081)                  │
+  │  Java WEKA Engine (OpenJDK 21, weka.jar)               │
+  │     │                                                  │
+  │     ▼  In-Memory Serialization                         │
+  │  WEKA RandomForest Model (projectmodel_weka.model)     │
+  └────────────────────────────────────────────────────────┘
+     │
+     ▼  SQLAlchemy (DATABASE_URL)
+Render Managed PostgreSQL Database
 ```
 
 ---
 
-## 4. Prerequisites
+## 3. Render Deployment (Backend + Java Engine)
 
-- **macOS** (Apple Silicon or Intel)
-- **Java**: Java 17+ or Java 25 (Bundled in `/Applications/weka-3.8.7.app/Contents/runtime/Contents/Home/bin/java`)
-- **Python**: Python 3.10+ (Tested on Python 3.14.5)
-- **Node.js**: Node.js 18+ & npm (Tested on Node v26.5.0, npm 11.17.0)
+Render runs both the Java WEKA prediction engine and the FastAPI backend within a single managed Docker Web Service container.
+
+### Step 1: Create a PostgreSQL Database on Render
+1. Go to your [Render Dashboard](https://dashboard.render.com).
+2. Click **New +** $\rightarrow$ **PostgreSQL**.
+3. Name it (e.g., `airline-satisfaction-db`).
+4. Select the Free or Starter plan.
+5. Click **Create Database**.
+6. Once provisioned, copy the **Internal Database URL** (e.g., `postgres://user:password@host/dbname`).
+
+### Step 2: Create the Docker Web Service on Render
+1. Push your repository to GitHub (see [Git Instructions](#5-git-commands-to-push-to-github)).
+2. In the Render Dashboard, click **New +** $\rightarrow$ **Web Service**.
+3. Connect your GitHub repository.
+4. Set the following settings:
+   - **Name**: `airline-satisfaction-backend`
+   - **Language**: `Docker`
+   - **Branch**: `main`
+   - **Root Directory**: `.` (leave as root)
+   - **Dockerfile Path**: `./Dockerfile` (or `./backend/Dockerfile`)
+   - **Instance Type**: `Free` or `Starter` (Starter 1GB recommended for production)
+5. Under **Environment Variables**, add:
+   - `DATABASE_URL`: Paste the Internal Database URL from Step 1.
+   - `CORS_ORIGINS`: `["https://your-frontend.vercel.app", "http://localhost:5173"]` (or `*`)
+   - `JAVA_OPTS`: `-Xms128m -Xmx600m`
+6. Click **Create Web Service**.
+7. Render will build the Docker container, launch the Java prediction engine, wait for the model to load into memory, and expose FastAPI.
+8. Once deployed, note your service URL (e.g., `https://airline-satisfaction-backend.onrender.com`).
 
 ---
 
-## 5. Quick Start Instructions (macOS)
+## 4. Vercel Deployment (Frontend React SPA)
 
-Open **3 separate Terminal tabs** in `/Users/siddharthsingh/wekaproject`:
+1. Go to your [Vercel Dashboard](https://vercel.com/dashboard).
+2. Click **Add New...** $\rightarrow$ **Project**.
+3. Import your GitHub repository.
+4. Configure the project settings:
+   - **Framework Preset**: `Vite`
+   - **Root Directory**: Click *Edit* and select **`frontend`**
+   - **Build Command**: `npm run build`
+   - **Output Directory**: `dist`
+5. Under **Environment Variables**, add:
+   - **Name**: `VITE_API_BASE_URL`
+   - **Value**: `https://airline-satisfaction-backend.onrender.com/api` (replace with your Render backend URL)
+6. Click **Deploy**.
+7. Once deployed, Vercel gives you your production URL (e.g., `https://airline-satisfaction.vercel.app`).
+8. Back in Render, add your Vercel URL to `CORS_ORIGINS` if you restricted CORS.
 
-### Terminal 1: Start Java WEKA Prediction Engine (Port 8081)
+---
 
+## 5. Git Commands to Push to GitHub
+
+```bash
+cd /Users/siddharthsingh/wekaproject
+
+# 1. Create a new repository on github.com (e.g. airline-satisfaction-app)
+
+# 2. Add your remote
+git remote add origin https://github.com/<YOUR_USERNAME>/airline-satisfaction-app.git
+
+# 3. Ensure branch is main
+git branch -M main
+
+# 4. Push code and model to GitHub
+git push -u origin main
+```
+
+> **Note on Model Size**: The model file `backend/model/projectmodel_weka.model` is **70.4 MB**. GitHub permits files up to 100 MB directly via standard `git push`.
+
+---
+
+## 6. Local Development (macOS)
+
+Open 3 separate Terminal tabs in `/Users/siddharthsingh/wekaproject`:
+
+### Terminal 1: Java WEKA Prediction Engine (Port 8081)
 ```bash
 cd /Users/siddharthsingh/wekaproject/backend/java-engine
 ./start-engine.sh
 ```
-*Output confirmation: `[Java Weka Server] Server is running on http://127.0.0.1:8081`*
 
-### Terminal 2: Start FastAPI Python Backend (Port 8000)
-
+### Terminal 2: FastAPI Backend (Port 8000)
 ```bash
 cd /Users/siddharthsingh/wekaproject/backend
 ./start-backend.sh
 ```
-*Output confirmation: `Uvicorn running on http://0.0.0.0:8000`*
 
-### Terminal 3: Start React Frontend (Port 5173)
-
+### Terminal 3: Vite React Frontend (Port 5173)
 ```bash
 cd /Users/siddharthsingh/wekaproject/frontend
 ./start-frontend.sh
 ```
-*Output confirmation: `Local: http://localhost:5173/`*
 
-Now open your browser at **[http://localhost:5173](http://localhost:5173)**.
-
----
-
-## 6. REST API Endpoints
-
-Interactive Swagger UI documentation is available at **[http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)**.
-
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/health` | Returns backend status, Java engine status, and model load status |
-| `GET` | `/api/model/info` | Returns model specifications, schema attributes, and verified 10-fold CV metrics |
-| `POST` | `/api/predict` | Computes prediction via WEKA RandomForest and records history in SQLite |
-| `GET` | `/api/predictions` | Fetches stored prediction history (supports pagination) |
-| `DELETE` | `/api/predictions` | Clears all prediction history with confirmation |
-| `DELETE` | `/api/predictions/{id}` | Deletes an individual prediction record |
-| `GET` | `/api/dashboard/stats` | Returns real-time aggregate application statistics & recent feed |
+Open browser at **[http://localhost:5173](http://localhost:5173)**.
 
 ---
 
 ## 7. Automated Testing
 
-To run the automated integration test suite:
+To run the integration tests locally:
 
 ```bash
 cd /Users/siddharthsingh/wekaproject/backend
@@ -180,18 +178,20 @@ pytest tests/test_api.py
 ```
 
 All 7 integration tests verify:
-1. Health endpoint response and Java engine connectivity
-2. Model info schema and 10-fold CV metrics
-3. Live prediction of Satisfied class instance
-4. Live prediction of Neutral or Dissatisfied class instance
-5. Input range validation and 422 error rejection
-6. History persistence in SQLite
-7. Dashboard live statistics calculation
+- Backend `/health` connectivity to Java engine
+- Model info and 10-fold CV metrics
+- Real-time classification for Satisfied and Dissatisfied profiles
+- Pydantic range validation rejection (422)
+- SQLite/PostgreSQL history logging and retrieval
+- Real-time dashboard statistics calculation
 
 ---
 
-## 8. Model Limitations & Transparency
+## 8. Troubleshooting
 
-1. **Probability Estimates**: Model probabilities represent the proportion of RandomTree estimators in the forest agreeing on a specific class; they are statistical estimates, not guaranteed certainty.
-2. **Evaluation Domain**: The historical 96.3435% accuracy represents cross-validation on the passenger dataset; real-world distribution shifts may affect live performance.
-3. **Attribute Scale**: Service rating attributes must remain on a standard 0 to 5 scale as expected by the training schema.
+| Issue | Cause | Solution |
+|---|---|---|
+| **Render: Out Of Memory (OOM)** | Java default memory exceeded container RAM. | Set environment variable `JAVA_OPTS=-Xms128m -Xmx512m` in Render dashboard. |
+| **Vercel: 404 on refresh** | Direct navigation without SPA rewrites. | Verified `frontend/vercel.json` rewrite `{ "source": "/(.*)", "destination": "/index.html" }` is included. |
+| **Frontend: CORS Network Error** | Backend did not allow frontend origin. | Ensure `CORS_ORIGINS` in Render includes your Vercel URL or `*`. |
+| **Backend: Database connection error** | Render provides `postgres://` which SQLAlchemy 2.0 rejects. | `settings.py` automatically converts `postgres://` to `postgresql://`. Ensure `psycopg2-binary` is installed. |
