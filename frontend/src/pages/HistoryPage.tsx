@@ -126,14 +126,14 @@ export const HistoryPage: React.FC = () => {
   });
 
   return (
-    <div className="space-y-6 animate-fade-in max-w-6xl mx-auto">
+    <div className="space-y-5 sm:space-y-6 animate-fade-in max-w-6xl mx-auto">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
             Prediction History
           </h1>
-          <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">
             Browse, inspect, and export persistent records stored in the SQLite database.
           </p>
         </div>
@@ -143,7 +143,7 @@ export const HistoryPage: React.FC = () => {
             <>
               <button
                 onClick={handleExportCSV}
-                className="px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-semibold flex items-center gap-2 shadow-sm transition-all"
+                className="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-all"
               >
                 <Download className="w-3.5 h-3.5" />
                 <span>Export CSV</span>
@@ -151,7 +151,7 @@ export const HistoryPage: React.FC = () => {
 
               <button
                 onClick={() => setConfirmClear(true)}
-                className="px-3.5 py-2 rounded-xl border border-rose-200 dark:border-rose-900/60 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/60 text-xs font-semibold flex items-center gap-2 transition-all"
+                className="px-3 py-2 rounded-xl border border-rose-200 dark:border-rose-900/60 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/60 text-xs font-semibold flex items-center gap-1.5 transition-all"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 <span>Clear All</span>
@@ -188,7 +188,7 @@ export const HistoryPage: React.FC = () => {
       )}
 
       {/* Search and Filters */}
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3">
         <div className="relative flex-1">
           <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
@@ -201,11 +201,11 @@ export const HistoryPage: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
-          <Filter className="w-4 h-4 text-slate-400" />
+          <Filter className="w-4 h-4 text-slate-400 shrink-0" />
           <select
             value={filterClass}
             onChange={(e) => setFilterClass(e.target.value)}
-            className="px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 shadow-sm"
+            className="w-full sm:w-auto px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 shadow-sm"
           >
             <option value="all">All Outcomes</option>
             <option value="Satisfied">Satisfied Only</option>
@@ -214,16 +214,16 @@ export const HistoryPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Predictions Table */}
+      {/* Predictions Table Container */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
         {loading ? (
           <div className="py-20 text-center">
             <div className="w-6 h-6 border-2 border-brand-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-            <p className="text-xs text-slate-600 dark:text-slate-400">Loading records...</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Loading records...</p>
           </div>
         ) : filteredHistory.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-xs">
+          <div className="overflow-x-auto -mx-0">
+            <table className="w-full text-left border-collapse text-xs min-w-[620px]">
               <thead>
                 <tr className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-semibold">
                   <th className="py-3 px-4">Date & ID</th>
@@ -241,46 +241,46 @@ export const HistoryPage: React.FC = () => {
                       key={item.id}
                       className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors"
                     >
-                      <td className="py-3.5 px-4 font-mono">
+                      <td className="py-3 px-4 font-mono">
                         <div className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 font-medium">
-                          <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                          <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                           <span>{new Date(item.created_at).toLocaleDateString()}</span>
                         </div>
-                        <span className="text-[10px] text-slate-600 dark:text-slate-400 block mt-0.5">
+                        <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-0.5">
                           {new Date(item.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} &bull; {item.id.slice(0, 8)}
                         </span>
                       </td>
 
-                      <td className="py-3.5 px-4">
+                      <td className="py-3 px-4">
                         <span className="font-semibold text-slate-900 dark:text-white block">
                           {item.flight_class} &bull; {item.type_of_travel}
                         </span>
-                        <span className="text-[11px] text-slate-600 dark:text-slate-400">
+                        <span className="text-[11px] text-slate-500 dark:text-slate-400">
                           {item.gender}, {item.age}y &bull; {item.customer_type} &bull; {item.flight_distance} mi
                         </span>
                       </td>
 
-                      <td className="py-3.5 px-4">
+                      <td className="py-3 px-4">
                         <span
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold ${
+                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold ${
                             isSatisfied
                               ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
                               : 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800'
                           }`}
                         >
-                          {isSatisfied ? <ThumbsUp className="w-3 h-3" /> : <ThumbsDown className="w-3 h-3" />}
-                          <span>{item.predicted_class}</span>
+                          {isSatisfied ? <ThumbsUp className="w-3 h-3 shrink-0" /> : <ThumbsDown className="w-3 h-3 shrink-0" />}
+                          <span className="truncate">{item.predicted_class}</span>
                         </span>
                       </td>
 
-                      <td className="py-3.5 px-4">
-                        <div className="w-36 space-y-1">
+                      <td className="py-3 px-4">
+                        <div className="w-32 sm:w-36 space-y-1">
                           <div className="flex justify-between text-[10px] font-mono">
                             <span className="text-emerald-600 dark:text-emerald-400">
                               {(item.probabilities['Satisfied'] * 100).toFixed(0)}% Sat
                             </span>
                             <span className="text-amber-600 dark:text-amber-400">
-                              {(item.probabilities['Neutral or Dissatisfied'] * 100).toFixed(0)}% Neu/Dis
+                              {(item.probabilities['Neutral or Dissatisfied'] * 100).toFixed(0)}% Neu
                             </span>
                           </div>
                           <div className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden flex">
@@ -296,8 +296,8 @@ export const HistoryPage: React.FC = () => {
                         </div>
                       </td>
 
-                      <td className="py-3.5 px-4 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
+                      <td className="py-3 px-4 text-right">
+                        <div className="flex items-center justify-end gap-1">
                           <button
                             onClick={() => setSelectedItem(item)}
                             className="p-1.5 rounded-lg text-slate-500 hover:text-brand-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
@@ -322,10 +322,10 @@ export const HistoryPage: React.FC = () => {
             </table>
           </div>
         ) : (
-          <div className="py-16 text-center">
+          <div className="py-16 text-center px-4">
             <History className="w-10 h-10 text-slate-300 dark:text-slate-700 mx-auto mb-3" />
             <h3 className="font-semibold text-slate-800 dark:text-slate-200 text-sm">No prediction records found</h3>
-            <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 max-w-sm mx-auto">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">
               {search || filterClass !== 'all'
                 ? 'Try adjusting your search criteria or clearing filters.'
                 : 'Run satisfaction predictions from the prediction page to populate the history.'}
@@ -343,14 +343,14 @@ export const HistoryPage: React.FC = () => {
 
       {/* Details Modal */}
       {selectedItem && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 space-y-6">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 animate-in fade-in">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6 space-y-5">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
               <div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
                   Prediction Details & Feature Ratings
                 </h3>
-                <p className="text-xs text-slate-600 dark:text-slate-400 font-mono mt-0.5">
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 font-mono mt-0.5 truncate max-w-xs">
                   ID: {selectedItem.id}
                 </p>
               </div>
@@ -363,11 +363,11 @@ export const HistoryPage: React.FC = () => {
             </div>
 
             {/* Outcome Pill & Date */}
-            <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/60">
+            <div className="grid grid-cols-3 gap-2 p-3 sm:p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/60 text-center">
               <div>
-                <span className="text-[11px] text-slate-600 dark:text-slate-400 block font-semibold">Predicted Class</span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-semibold">Predicted</span>
                 <span
-                  className={`inline-block mt-1 font-bold text-sm px-3 py-1 rounded-full ${
+                  className={`inline-block mt-1 font-bold text-xs px-2 py-0.5 rounded-full ${
                     selectedItem.predicted_class === 'Satisfied'
                       ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300'
                       : 'bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300'
@@ -377,14 +377,14 @@ export const HistoryPage: React.FC = () => {
                 </span>
               </div>
               <div>
-                <span className="text-[11px] text-slate-600 dark:text-slate-400 block font-semibold">Satisfied Prob</span>
-                <span className="text-sm font-bold font-mono text-emerald-600 dark:text-emerald-400">
+                <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-semibold">Satisfied Prob</span>
+                <span className="text-xs sm:text-sm font-bold font-mono text-emerald-600 dark:text-emerald-400">
                   {(selectedItem.probabilities['Satisfied'] * 100).toFixed(1)}%
                 </span>
               </div>
               <div>
-                <span className="text-[11px] text-slate-600 dark:text-slate-400 block font-semibold">Neutral/Dissat Prob</span>
-                <span className="text-sm font-bold font-mono text-amber-600 dark:text-amber-400">
+                <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-semibold">Neutral Prob</span>
+                <span className="text-xs sm:text-sm font-bold font-mono text-amber-600 dark:text-amber-400">
                   {(selectedItem.probabilities['Neutral or Dissatisfied'] * 100).toFixed(1)}%
                 </span>
               </div>
@@ -392,36 +392,36 @@ export const HistoryPage: React.FC = () => {
 
             {/* Demographics */}
             <div className="space-y-2">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+              <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 Demographics & Flight Operations
               </h4>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
                 <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-700/40">
-                  <span className="text-[10px] text-slate-600 dark:text-slate-400 block">Gender & Age</span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 block">Gender & Age</span>
                   <span className="font-semibold">{selectedItem.gender}, {selectedItem.age} yrs</span>
                 </div>
                 <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-700/40">
-                  <span className="text-[10px] text-slate-600 dark:text-slate-400 block">Loyalty Type</span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 block">Loyalty Type</span>
                   <span className="font-semibold">{selectedItem.customer_type}</span>
                 </div>
                 <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-700/40">
-                  <span className="text-[10px] text-slate-600 dark:text-slate-400 block">Travel Purpose</span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 block">Travel Purpose</span>
                   <span className="font-semibold">{selectedItem.type_of_travel}</span>
                 </div>
                 <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-700/40">
-                  <span className="text-[10px] text-slate-600 dark:text-slate-400 block">Cabin Class</span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 block">Cabin Class</span>
                   <span className="font-semibold">{selectedItem.flight_class}</span>
                 </div>
                 <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-700/40">
-                  <span className="text-[10px] text-slate-600 dark:text-slate-400 block">Flight Distance</span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 block">Flight Distance</span>
                   <span className="font-semibold">{selectedItem.flight_distance} mi</span>
                 </div>
                 <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-700/40">
-                  <span className="text-[10px] text-slate-600 dark:text-slate-400 block">Departure Delay</span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 block">Departure Delay</span>
                   <span className="font-semibold">{selectedItem.departure_delay} min</span>
                 </div>
                 <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-700/40">
-                  <span className="text-[10px] text-slate-600 dark:text-slate-400 block">Arrival Delay</span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 block">Arrival Delay</span>
                   <span className="font-semibold">{selectedItem.arrival_delay} min</span>
                 </div>
               </div>
@@ -429,7 +429,7 @@ export const HistoryPage: React.FC = () => {
 
             {/* Service Ratings Grid */}
             <div className="space-y-2">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+              <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 Service Ratings (0–5)
               </h4>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
@@ -446,12 +446,12 @@ export const HistoryPage: React.FC = () => {
                   { name: 'Baggage Handling', val: selectedItem.baggage_handling },
                   { name: 'Check-in Service', val: selectedItem.checkin_service },
                   { name: 'Gate Location', val: selectedItem.gate_location },
-                  { name: 'Ease of Online Booking', val: selectedItem.ease_of_online_booking },
+                  { name: 'Ease of Booking', val: selectedItem.ease_of_online_booking },
                   { name: 'Time Convenience', val: selectedItem.departure_and_arrival_time_convenience }
                 ].map((r, i) => (
                   <div key={i} className="flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-800/30 border border-slate-200/50 dark:border-slate-700/40">
                     <span className="text-slate-700 dark:text-slate-300 truncate text-[11px]">{r.name}</span>
-                    <span className="font-bold font-mono text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-950/60 px-1.5 py-0.5 rounded text-[11px]">
+                    <span className="font-bold font-mono text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-950/60 px-1.5 py-0.5 rounded text-[11px] shrink-0">
                       {r.val}/5
                     </span>
                   </div>
@@ -459,10 +459,10 @@ export const HistoryPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-end">
+            <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-end">
               <button
                 onClick={() => setSelectedItem(null)}
-                className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-semibold"
+                className="w-full sm:w-auto px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-semibold"
               >
                 Close Details
               </button>
